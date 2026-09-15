@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.renderer.blockentity.AbstractSignRenderer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -20,27 +21,12 @@ public class SignRenderer_textMixin {
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;" +
-                            "getFrontText()Lnet/minecraft/world/level/block/entity/SignText;"
+                            "getText(Lnet/minecraft/world/level/block/entity/SignTextSlot;" +
+                            ")Lnet/minecraft/world/level/block/entity/SignText;"
             )
     )
-    private SignText moreculling$cullFrontSignText(SignBlockEntity instance, Operation<SignText> original) {
-        SignText text = original.call(instance);
-        return CullingUtils.cullSignText(instance.getBlockPos(), instance.getBlockState(), true, text) ? text : null;
-    }
-
-    @WrapOperation(
-            method = "extractRenderState(Lnet/minecraft/world/level/block/entity/SignBlockEntity;" +
-                    "Lnet/minecraft/client/renderer/blockentity/state/SignRenderState;" +
-                    "FLnet/minecraft/world/phys/Vec3;" +
-                    "Lnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;" +
-                            "getBackText()Lnet/minecraft/world/level/block/entity/SignText;"
-            )
-    )
-    private SignText moreculling$cullBackSignText(SignBlockEntity instance, Operation<SignText> original) {
-        SignText text = original.call(instance);
-        return CullingUtils.cullSignText(instance.getBlockPos(), instance.getBlockState(), false, text) ? text : null;
+    private SignText moreculling$cullSignText(SignBlockEntity instance, SignTextSlot slot, Operation<SignText> original) {
+        SignText text = original.call(instance, slot);
+        return CullingUtils.cullSignText(instance.getBlockPos(), instance.getBlockState(), slot == SignTextSlot.FRONT, text) ? text : null;
     }
 }

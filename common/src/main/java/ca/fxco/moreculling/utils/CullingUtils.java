@@ -4,10 +4,11 @@ import ca.fxco.moreculling.MoreCulling;
 import ca.fxco.moreculling.api.block.LeavesCulling;
 import ca.fxco.moreculling.api.blockstate.MoreStateCulling;
 import ca.fxco.moreculling.api.blockstate.StateCullingShapeCache;
-import com.mojang.logging.LogUtils;
+import ca.fxco.moreculling.states.ItemRendererStates;
 import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.state.ItemFrameRenderState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -25,6 +26,9 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import static ca.fxco.moreculling.utils.MathUtils.ONE_SIGN_ROTATION;
@@ -231,7 +235,7 @@ public class CullingUtils {
             return true;
         }
 
-        Component[] messages = text.getMessages(false);
+        List<Component> messages = text.getMessages(false);
         for (Component message : messages) {
             if (!message.getString().isEmpty()) {
                 return false;
@@ -249,5 +253,23 @@ public class CullingUtils {
                 .moreculling$shouldAttemptToCullAgainst(oppositeDir, level, posBehind)) &&
                 ((StateCullingShapeCache) blockState)
                         .moreculling$getFaceCullingShape(dir) == Shapes.block();
+    }
+
+
+    public static List<BakedQuad> cullItemQuads(List<BakedQuad> quads) {
+        List<BakedQuad> bakedQuads = new ArrayList<>();
+
+        Iterator<BakedQuad> iterator = quads.iterator();
+        quads: while (iterator.hasNext()) {
+            BakedQuad bakedQuad = iterator.next();
+            Direction face = bakedQuad.direction();
+            for (Direction dir : ItemRendererStates.DIRECTIONS) {
+                if (face == dir) {
+                    bakedQuads.add(bakedQuad);
+                    continue quads;
+                }
+            }
+        }
+        return bakedQuads;
     }
 }

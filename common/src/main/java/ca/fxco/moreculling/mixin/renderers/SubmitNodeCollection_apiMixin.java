@@ -1,13 +1,17 @@
 package ca.fxco.moreculling.mixin.renderers;
 
-import ca.fxco.moreculling.api.renderers.modelsubmit.*;
+import ca.fxco.moreculling.api.renderers.modelsubmit.BlockModelSubmitFor3Faces;
+import ca.fxco.moreculling.api.renderers.modelsubmit.BlockModelSubmitForFace;
+import ca.fxco.moreculling.api.renderers.modelsubmit.BlockModelSubmitForFaces;
+import ca.fxco.moreculling.api.renderers.modelsubmit.BlockModelSubmitWithoutFace;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.renderer.feature.phase.FeatureRenderPhase;
 import net.minecraft.client.renderer.feature.phase.SimpleFeatureRenderPhase;
-import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
+import net.minecraft.client.renderer.feature.submit.TranslucentSubmit;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
@@ -23,7 +27,7 @@ abstract class SubmitNodeCollection_apiMixin implements OrderedSubmitNodeCollect
 
     @Shadow
     @Final
-    public TranslucentFeatureRenderPhase translucentBlocksAndItems;
+    public FeatureRenderPhase<? super TranslucentSubmit> translucentBlocksAndItems;
     @Shadow
     @Final
     public SimpleFeatureRenderPhase solid;

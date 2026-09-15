@@ -32,8 +32,8 @@ neoForge {
 }
 
 dependencies {
-   // runtimeOnly "maven.modrinth:sodium:mc26.1.2-0.8.12-neoforge"
-    compileOnly "net.caffeinemc:sodium-neoforge-mod:${project.sodium_version}"
+    implementation "net.caffeinemc:sodium-neoforge:${project.sodium_version}"
+    implementation "net.caffeinemc:sodium-neoforge-mod:${project.sodium_version}"
     runtimeOnly "me.shedaniel.cloth:cloth-config-neoforge:${project.cloth_config_version}"
 
     //implementation "maven.modrinth:client-tweaks:${project.clienttweaks_version}+neoforge-${project.minecraft_version}"
@@ -42,9 +42,6 @@ dependencies {
     implementation(jarJar("me.fallenbreath:conditional-mixin-neoforge:${project.conditional_mixins_version}"))
 
     compileOnly "maven.modrinth:modernfix-mvus:${modernfix_version}-neoforge"
-
-    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:${project.mixinsquared_version}"))
-    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-neoforge:${project.mixinsquared_version}"))
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }

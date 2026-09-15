@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Restriction(require = @Condition("fabric-renderer-api-v1"))
+@Restriction(require = {@Condition("fabric-renderer-api-v1"), @Condition("fabric-renderer-indigo")})
 @Mixin(FeatureRenderDispatcher.class)
 public abstract class FeatureRenderDispatcher_fabricCullMixin {
 

@@ -11,6 +11,7 @@ import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.renderer.entity.state.ItemFrameRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
@@ -18,8 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
 import static ca.fxco.moreculling.utils.DirectionUtils.shiftDirection;
@@ -39,13 +39,15 @@ public class ItemStackRenderState_faceCullingMixin {
             method = "submit",
             at = @At(
                     value = "FIELD",
-                    target = "Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;quads:Ljava/util/List;",
+                    target = "Lnet/minecraft/client/renderer/item/ItemStackRenderState$LayerRenderState;quads:Lnet/minecraft/client/resources/model/geometry/ItemQuads;",
                     opcode = Opcodes.GETFIELD
             )
     )
-    private List<BakedQuad> moreculling$onlySomeFaces$Vanilla(ItemStackRenderState.LayerRenderState instance,
-                                                                     Operation<List<BakedQuad>> original) {
-        List<BakedQuad> quads = original.call(instance);
+    private ItemQuads moreculling$onlySomeFaces$Vanilla(ItemStackRenderState.LayerRenderState instance, Operation<ItemQuads> original) {
+        ItemQuads quads = original.call(instance);
+        if (quads.isEmpty()) {
+            return quads;
+        }
         ItemFrameRenderState frame = ItemRendererStates.ITEM_FRAME;
         if (frame == null) {
             ItemRendererStates.DIRECTIONS = null;
@@ -108,19 +110,21 @@ public class ItemStackRenderState_faceCullingMixin {
             }
         }
         if (ItemRendererStates.DIRECTIONS != null) {
-            List<BakedQuad> bakedQuads = new ArrayList<>();
-            Iterator<BakedQuad> iterator = quads.iterator();
-            quads: while (iterator.hasNext()) {
-                BakedQuad bakedQuad = iterator.next();
-                Direction face = bakedQuad.direction();
-                for (Direction dir : ItemRendererStates.DIRECTIONS) {
-                    if (face == dir) {
-                        bakedQuads.add(bakedQuad);
-                        continue quads;
-                    }
+            if (!quads.solid().isEmpty()) {
+                List<BakedQuad> culledQuads = CullingUtils.cullItemQuads(quads.solid());
+                if (quads.translucent().isEmpty()) {
+                    return new ItemQuads(culledQuads, culledQuads, Collections.emptyList());
+                } else {
+                    return new ItemQuads(
+                            CullingUtils.cullItemQuads(quads.all()),
+                            CullingUtils.cullItemQuads(quads.solid()),
+                            CullingUtils.cullItemQuads(quads.translucent())
+                    );
                 }
+            } else {
+                List<BakedQuad> culledQuads = CullingUtils.cullItemQuads(quads.translucent());
+                return new ItemQuads(culledQuads, Collections.emptyList(), culledQuads);
             }
-            return bakedQuads;
         }
         return quads;
     }
